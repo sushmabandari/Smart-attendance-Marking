@@ -1,0 +1,43 @@
+<!-- webcam_app/templates/webcam_app/index.html -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Webcam Capture</title>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/webcamjs/1.0.25/webcam.min.js"></script>
+    {% csrf_token %}
+</head>
+<body>
+    <h1>Webcam Capture</h1>
+    <div id="camera"></div>
+    <button id="capture">Capture Photo</button>
+    <script>
+        Webcam.set({
+            width: 640,
+            height: 480,
+            dest_width: 640,
+            dest_height: 480,
+            image_format: 'jpeg',
+            jpeg_quality: 90
+        });
+        Webcam.attach('#camera');
+
+        $('#capture').click(function() {
+            Webcam.snap(function(data_uri) {
+                // Include the CSRF token in the POST request
+                var csrf_token = $('[name="csrfmiddlewaretoken"]').val();
+                $.ajax({
+                    url: '/upload_image/',
+                    type: 'POST',
+                    data: { 'image_data': data_uri },
+                    headers: { 'X-CSRFToken': csrf_token },
+                    success: function(response) {
+                        alert(response.message);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
